@@ -1,0 +1,2 @@
+# SmolDogiesInSocks
+Sistemas Distribuidos
