@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/L01-UDP/L01-UDP.iml" filepath="$PROJECT_DIR$/L01-UDP/L01-UDP.iml" />
+      <module fileurl="file://$PROJECT_DIR$/L01-UDP/L02-UDP Multicast.iml" filepath="$PROJECT_DIR$/L01-UDP/L02-UDP Multicast.iml" />
     </modules>
   </component>
 </project>
