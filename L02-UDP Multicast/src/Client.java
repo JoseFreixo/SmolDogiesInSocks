@@ -33,29 +33,37 @@ public class Client {
         multicastSocket.joinGroup(InetAddress.getByName(args[0]));
         multicastSocket.setSoTimeout(timeout);
         multicastSocket.receive(multicastPacket);
-        String srvcPort = multicastPacket.getData().toString();
+        String info = new String(multicastPacket.getData()).trim();
+        String[] srvcInfo = info.split(":");
+
+        System.out.println(srvcInfo[0] + " - " + srvcInfo[1]);
 
         // Criar o socket para enviar a mensagem e enviar
-        DatagramSocket socket = new DatagramSocket(Integer.parseInt(srvcPort));
+        DatagramSocket socket = new DatagramSocket();
         socket.setSoTimeout(timeout);
         byte[] sbuf = message.getBytes();
-        InetAddress address = InetAddress.getByName(args[0]);
-        DatagramPacket packet = new DatagramPacket(sbuf, sbuf.length, address, Integer.parseInt(args[1]));
-        socket.send(packet);
+        InetAddress address = InetAddress.getByName(srvcInfo[0]);
+        DatagramPacket packet = new DatagramPacket(sbuf, sbuf.length, address, Integer.parseInt(srvcInfo[1]));
 
         // Receber a resposta do server
         byte[] rbuf = new byte[sbuf.length];
-        packet = new DatagramPacket(rbuf, rbuf.length);
+        DatagramPacket rpacket = new DatagramPacket(rbuf, rbuf.length);
 
-        try {
-            socket.receive(packet);
-        } catch (SocketTimeoutException e) {
-            System.out.println("Server timed out|");
-            return;
+        boolean cond = true;
+        while(cond) {
+            socket.send(packet);
+            System.out.println("Sent the info to !");
+
+            try {
+                socket.receive(rpacket);
+                cond = false;
+            } catch (SocketTimeoutException e) {
+                System.out.println("Server timed out|");
+            }
         }
 
 //        for (int i = 0; i < args.length; i++) {
-        System.out.println(packet.getData());
+        System.out.println(new String(rpacket.getData()));
 //        }
     }
 }

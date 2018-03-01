@@ -19,22 +19,28 @@ public class Server {
         DatagramSocket socket = new DatagramSocket(Integer.parseInt(args[0]));
         socket.setSoTimeout(timeout);
 
-        byte[] sbuf = args[0].getBytes();
-        int port = Integer.parseInt(args[0]);
+//      int port = Integer.parseInt(args[0]);
         InetAddress address = InetAddress.getByName(args[1]);
+        String local = InetAddress.getLocalHost().getHostName();
+
+        String message = local + ":" + args[0];
+
+        byte[] sbuf = message.getBytes();
         DatagramPacket announce = new DatagramPacket(sbuf, sbuf.length, address, Integer.parseInt(args[2]));
-//      String message = ""
         byte[] rbuf = new byte[1024];
         DatagramPacket packet = new DatagramPacket(rbuf, rbuf.length);
 
         while (true) {
 
             try {
+                System.out.println("Waiting for a Client");
                 socket.receive(packet);
-                System.out.println("Received stuff! Manel!" + packet.getData().toString());
+                System.out.println("Received stuff! Manel! " + new String(packet.getData()).trim());
+                packet.setData("WE DID IT REDDIT".getBytes());
+                socket.send(packet);
+
             } catch (SocketTimeoutException e) {
                 multicastSocket.send(announce);
-                System.out.println("multicast: <" + args[1] + "> <" + args[2] + ">: <" + announce.getData().toString());
             }
 
             if (false)
