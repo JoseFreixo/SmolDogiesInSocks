@@ -25,6 +25,7 @@ public class Server {
 
         String message = local + ":" + args[0];
 
+
         byte[] sbuf = message.getBytes();
         DatagramPacket announce = new DatagramPacket(sbuf, sbuf.length, address, Integer.parseInt(args[2]));
         byte[] rbuf = new byte[1024];
