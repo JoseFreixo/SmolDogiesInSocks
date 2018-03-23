@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,6 +11,12 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Control implements ControlInterface {
     private static int id;
@@ -40,7 +47,6 @@ public class Control implements ControlInterface {
         mdc_socket.joinGroup(mdc_ip);
         mcc_socket.joinGroup(mcc_ip);
     }
-
     private static String encodeSHA256(String text) {
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -67,7 +73,10 @@ public class Control implements ControlInterface {
 
     @Override
     public int backup(String file_name, String repl) throws IOException {
-        /*File file = new File(file_name);
+        int timeout = 1000;
+        mdc_socket.setSoTimeout(timeout);
+
+        File file = new File(file_name);
         Path path = Paths.get(file.getAbsolutePath());
         BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
         byte[] body = Files.readAllBytes(path);
@@ -77,8 +86,26 @@ public class Control implements ControlInterface {
         byte[] sbuf1 = message.getBytes();
         byte[] result = concat(sbuf1,body);
 
+        System.out.println(result.length);
         DatagramPacket packet = new DatagramPacket(result, result.length, mdc_ip, mdc_port);
-        mdc_socket.send(packet);*/
+
+        /*int tries = 0;
+        boolean done = false;
+
+        while (tries < 5 && !done) {
+            mdc_socket.send(packet);
+            int i;
+            for (i = Integer.parseInt(repl); i > 0; i++) {
+                try {
+                    mcc_socket.receive(packet);
+                } catch (SocketTimeoutException e) {
+                    tries++;
+                    break;
+                }
+            }
+            if (i <= 0)
+                done = true;
+        }*/
 
         /*Path newfile = Paths.get("Copy of " + file_name);
         Files.write(newfile, body);*/

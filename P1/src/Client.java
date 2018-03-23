@@ -8,7 +8,7 @@ public class Client {
 
         String host = (args.length < 1) ? null : args[0];
 
-        String filename = "manel.txt";
+        String filename = "test.txt";
         String replDeg = "2";
 
         try {
