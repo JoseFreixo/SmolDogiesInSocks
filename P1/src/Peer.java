@@ -1,6 +1,13 @@
+import java.io.File;
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketTimeoutException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -8,17 +15,23 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 
 public class Peer implements ControlInterface {
-    private static int id;
-    private static InetAddress mdc_ip;
-    private static int mdc_port;
-    private static InetAddress mcc_ip;
-    private static int mcc_port;
-    private static MulticastSocket mdc_socket;
-    private static MulticastSocket mcc_socket;
-    private static String crlf = "" + (char)0xD + (char)0xA;
-    private static String version = "1.0";
+    protected static int id;
+    protected static InetAddress mdc_ip;
+    protected static int mdc_port;
+    protected static InetAddress mcc_ip;
+    protected static int mcc_port;
+    protected static MulticastSocket mdc_socket;
+    protected static MulticastSocket mcc_socket;
+    protected static String crlf = "" + (char)0xD + (char)0xA;
+    protected static String version = "1.0";
+    public int storedsRecieved = 0;
+    public int maxTries = 5;
+    public String fileSent;
+    public static Peer peer;
 
-    private Peer(){}
+    public Peer(){
+        this.peer = this;
+    }
 
     public static void main(String[] args) throws IOException{
 
@@ -29,9 +42,9 @@ public class Peer implements ControlInterface {
         }
 
         parseArgs(args);
-
-        SocketRunnable mdcRunnable = new SocketRunnable(mdc_ip,mdc_port,id);
-        SocketRunnable mccRunnable = new SocketRunnable(mcc_ip,mcc_port,id);
+        bootSockets(args);
+        SocketRunnable mdcRunnable = new SocketRunnable(mdc_ip,mdc_port,peer);
+        SocketRunnable mccRunnable = new SocketRunnable(mcc_ip,mcc_port,peer);
 
         Thread mdcThread = new Thread(mdcRunnable);
         Thread mccThread = new Thread(mccRunnable);
@@ -56,7 +69,7 @@ public class Peer implements ControlInterface {
         }
     }
 
-    private static void parseArgs(String[] args) throws IOException {
+    protected static void parseArgs(String[] args) throws IOException {
         id = Integer.parseInt(args[0]);
         mdc_ip = InetAddress.getByName(args[1]);
         mdc_port = Integer.parseInt(args[2]);
@@ -71,7 +84,7 @@ public class Peer implements ControlInterface {
     }
 
 
-    private static void bootSockets(String[] args) throws IOException {
+    protected static void bootSockets(String[] args) throws IOException {
         id = Integer.parseInt(args[0]);
         mdc_ip = InetAddress.getByName(args[1]);
         mdc_port = Integer.parseInt(args[2]);
@@ -84,7 +97,7 @@ public class Peer implements ControlInterface {
         mdc_socket.joinGroup(mdc_ip);
         mcc_socket.joinGroup(mcc_ip);
     }
-    private static String encodeSHA256(String text) {
+    protected static String encodeSHA256(String text) {
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(text.getBytes("UTF-8"));
@@ -108,47 +121,15 @@ public class Peer implements ControlInterface {
         return result;
     }
 
-    @Override
-    public int backup(String file_name, String repl) throws IOException {
-        /*int timeout = 1000;
-        mdc_socket.setSoTimeout(timeout);
 
-        File file = new File(file_name);
-        Path path = Paths.get(file.getAbsolutePath());
-        BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-        byte[] body = Files.readAllBytes(path);
-        String fileId = encodeSHA256(file_name + attr.creationTime() + attr.lastModifiedTime() + attr.size());
-        String chunkNo = "0";
-        String message = "PUTCHUNK " + version + " " + id + " " + fileId + " " + chunkNo + " " + repl + " " + crlf + crlf;
-        byte[] sbuf1 = message.getBytes();
-        byte[] result = concat(sbuf1,body);
+    public void store(PacketData packetData){
 
-        System.out.println(result.length);
-        DatagramPacket packet = new DatagramPacket(result, result.length, mdc_ip, mdc_port);*/
-
-        /*int tries = 0;
-        boolean done = false;
-
-        while (tries < 5 && !done) {
-            mdc_socket.send(packet);
-            int i;
-            for (i = Integer.parseInt(repl); i > 0; i++) {
-                try {
-                    mcc_socket.receive(packet);
-                } catch (SocketTimeoutException e) {
-                    tries++;
-                    break;
-                }
-            }
-            if (i <= 0)
-                done = true;
-        }*/
-
-        /*Path newfile = Paths.get("Copy of " + file_name);
-        Files.write(newfile, body);*/
-
-        System.out.println("Hello Manel");
-        return 0;
     }
 
+    @Override
+    public int backup(String file_name, String repl) throws IOException, InterruptedException {
+        PeerBackup peerBackup = new PeerBackup(file_name,repl);
+        peerBackup.run();
+        return 0;
+    }
 }

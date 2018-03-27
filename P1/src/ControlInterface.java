@@ -2,5 +2,5 @@ import java.io.IOException;
 import java.rmi.Remote;
 
 public interface ControlInterface extends Remote{
-    int backup(String file_name, String repl) throws IOException;
+    int backup(String file_name, String repl) throws IOException, InterruptedException;
 }

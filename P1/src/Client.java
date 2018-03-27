@@ -9,12 +9,12 @@ public class Client {
         String host = (args.length < 1) ? null : args[0];
 
         String filename = "test.txt";
-        String replDeg = "2";
+        String replDeg = "1";
 
         try {
             Registry registry = LocateRegistry.getRegistry(host);
             ControlInterface stub = (ControlInterface) registry.lookup("Manel");
-            int response = stub.backup("manel.java","1");
+            int response = stub.backup(filename,replDeg);
             System.out.println("response: " + response);
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
