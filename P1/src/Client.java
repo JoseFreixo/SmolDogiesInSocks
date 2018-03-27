@@ -14,7 +14,7 @@ public class Client {
         try {
             Registry registry = LocateRegistry.getRegistry(host);
             ControlInterface stub = (ControlInterface) registry.lookup("Manel");
-            int response = stub.backup(filename,replDeg);
+            int response = stub.backup("manel.java","1");
             System.out.println("response: " + response);
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
