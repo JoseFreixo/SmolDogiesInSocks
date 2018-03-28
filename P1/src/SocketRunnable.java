@@ -43,17 +43,19 @@ public class SocketRunnable implements Runnable {
                 socket.receive(packet);
                 System.out.println("recebi cenas");
                 PacketData packetData = new PacketData(packet);
-                String packetInfo = new String(packet.getData()).trim();
-                System.out.println(packetInfo);
                 if(this.peer.id == Integer.parseInt(packetData.getSenderId())){
                     continue;
                 }
+                System.out.println(new String(packetData.getBody()));
                 if(packetData.getType() == "STORED" && packetData.getFileId() == this.peer.fileSent){
                     System.out.println("recebi pacotee stored");
                     this.peer.storedsRecieved++;
                 }
-                if(packetData.getType() == "PUTCHUNK"){
-                    this.peer.store(packetData);
+                if(packetData.getType().equals("PUTCHUNK")){
+                    System.out.println("era putchunk vou guardar");
+                    PeerStore peerStore = new PeerStore(packetData);
+                    Thread storeThread = new Thread(peerStore);
+                    storeThread.start();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

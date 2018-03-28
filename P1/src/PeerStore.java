@@ -13,9 +13,10 @@ public class PeerStore extends Peer implements Runnable{
     @Override
     public void run() {
         System.out.println(id + " is Storing");
-        Path newfile = Paths.get("Copy of " + packetData.getFileId());
+        Path newFile = Paths.get("Copy of " + packetData.getFileId());
+        System.out.println(new String(packetData.getBody()));
         try {
-            Files.write(newfile, packetData.getBody());
+            Files.write(newFile, packetData.getBody());
         } catch (IOException e) {
             e.printStackTrace();
         }

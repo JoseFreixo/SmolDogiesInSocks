@@ -1,13 +1,23 @@
 import java.net.DatagramPacket;
-import java.nio.channels.DatagramChannel;
+import java.util.Arrays;
 
 public class PacketData {
     public String[] packetSplit;
+    public byte[] body;
     //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
     //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
     public PacketData(DatagramPacket packet) {
-        String packetInfo = new String(packet.getData());
-        this.packetSplit = packetInfo.split(" ");
+        byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());
+        byte[] remainder = null;
+        for (int i = 0; i < data.length; i++) {
+           if(data[i] == '\r' && data[i+1] == '\n' && data[i+2] == '\r' && data[i+3] == '\n'){
+               body = Arrays.copyOfRange(data, i+4, data.length);
+               remainder = Arrays.copyOfRange(data, 0, i-1);
+               break;
+           }
+        }
+        String header = new String(remainder).trim();
+        packetSplit = header.split(" ");
     }
 
     public String getType(){
@@ -27,7 +37,7 @@ public class PacketData {
     }
 
     public byte[] getBody(){
-        return packetSplit[7].getBytes();
+        return body;
     }
 
 }
