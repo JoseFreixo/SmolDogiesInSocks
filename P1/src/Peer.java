@@ -41,7 +41,6 @@ public class Peer implements ControlInterface {
             return;
         }
 
-        parseArgs(args);
         bootSockets(args);
         SocketRunnable mdcRunnable = new SocketRunnable(mdc_ip,mdc_port,peer);
         SocketRunnable mccRunnable = new SocketRunnable(mcc_ip,mcc_port,peer);
@@ -69,20 +68,6 @@ public class Peer implements ControlInterface {
         }
     }
 
-    protected static void parseArgs(String[] args) throws IOException {
-        id = Integer.parseInt(args[0]);
-        mdc_ip = InetAddress.getByName(args[1]);
-        mdc_port = Integer.parseInt(args[2]);
-        mcc_ip = InetAddress.getByName(args[3]);
-        mcc_port = Integer.parseInt(args[4]);
-
-        /*mdc_socket = new MulticastSocket(mdc_port);
-        mcc_socket = new MulticastSocket(mcc_port);
-
-        mdc_socket.joinGroup(mdc_ip);
-        mcc_socket.joinGroup(mcc_ip);*/
-    }
-
 
     protected static void bootSockets(String[] args) throws IOException {
         id = Integer.parseInt(args[0]);
@@ -93,9 +78,6 @@ public class Peer implements ControlInterface {
 
         mdc_socket = new MulticastSocket(mdc_port);
         mcc_socket = new MulticastSocket(mcc_port);
-
-        mdc_socket.joinGroup(mdc_ip);
-        mcc_socket.joinGroup(mcc_ip);
     }
     protected static String encodeSHA256(String text) {
         try{

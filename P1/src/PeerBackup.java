@@ -1,6 +1,6 @@
 import java.io.File;
 import java.io.IOException;
-import java.net.DatagramPacket;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,6 +18,7 @@ public class PeerBackup extends Peer implements Runnable{
     public int backup() throws IOException, InterruptedException {
         int timeout = 1000;
         mdc_socket.setSoTimeout(timeout);
+        mdc_socket.setTimeToLive(2);
 
         File file = new File(file_name);
         Path path = Paths.get(file.getAbsolutePath());
@@ -31,7 +32,8 @@ public class PeerBackup extends Peer implements Runnable{
 
         fileSent = fileId;
         DatagramPacket packet = new DatagramPacket(result, result.length, mdc_ip, mdc_port);
-
+        System.out.println(mdc_ip);
+        System.out.println(mdc_port);
         int tries = 0;
 
         int sleepingTime = 1000;
