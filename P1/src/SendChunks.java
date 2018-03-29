@@ -21,21 +21,19 @@ public class SendChunks implements Runnable{
     @Override
     public void run() {
         int tries = 0;
+        System.out.println("Thread a fazer o " + packetData.getChunkNo() + packetData.getFileId());
         while (tries < maxTries) {
             try {
                 socket.send(packet);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("enviei cenas");
             try {
                 Thread.sleep(sleepingTime);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             System.out.println(storedsRecieved.toString());
-            System.out.println(packetData.getChunkNo());
-            System.out.println(packetData.getFileId());
             System.out.println("Storeds received "+storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId()));
             if(storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId()) >= Integer.parseInt(packetData.getRepl()))
                 break;

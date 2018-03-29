@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.concurrent.*;
 
 public class PeerBackup extends Peer implements Runnable{
@@ -40,11 +41,13 @@ public class PeerBackup extends Peer implements Runnable{
             FileInputStream is = new FileInputStream(file);
             Path path = Paths.get(file.getAbsolutePath());
             BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-            byte[] body = new byte[6000];
+            byte[] bodyWithNulls = new byte[6000];
             int chunkLen = 0;
-            while ((chunkLen = is.read(body)) != -1) {
+            int chunkNo = 0;
+            while ((chunkLen = is.read(bodyWithNulls)) != -1) {
+                byte[] body = Arrays.copyOf(bodyWithNulls, chunkLen);
+                System.out.println();
                 String fileId = encodeSHA256(file_name + attr.creationTime() + attr.lastModifiedTime() + attr.size());
-                int chunkNo = 0;
                 String message = "PUTCHUNK " + version + " " + id + " " + fileId + " " + chunkNo + " " + repl + " " + crlf + crlf;
                 byte[] sbuf1 = message.getBytes();
                 byte[] result = concat(sbuf1,body);
@@ -52,6 +55,7 @@ public class PeerBackup extends Peer implements Runnable{
 
                 storedsRecieved.put(chunkNo+fileId,0);
                 PacketData packetData = new PacketData(packet);
+                System.out.println("lancar thread a fazer " + chunkNo + fileId);
                 chunkNo++;
                 SendChunks sendChunks = new SendChunks(packet,mdc_socket,packetData,storedsRecieved);
 
@@ -62,8 +66,6 @@ public class PeerBackup extends Peer implements Runnable{
         } catch (IOException ioE) {
             // problem reading, handle case
         }
-
-        System.out.println("Hello Manel");
         return 0;
     }
 
