@@ -6,6 +6,7 @@ public class PacketData {
     public byte[] body;
     //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
     //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
+    //DELETE <Version> <SenderId> <FileId> <CRLF><CRLF>
     public PacketData(DatagramPacket packet) {
         byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());
         byte[] remainder = null;
@@ -43,5 +44,4 @@ public class PacketData {
     public byte[] getBody(){
         return body;
     }
-
 }

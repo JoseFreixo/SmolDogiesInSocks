@@ -31,7 +31,7 @@ public class PeerBackup extends Peer implements Runnable{
         this.repl = repl;
     }
 
-    public int backup() throws IOException, InterruptedException {
+    public int backup() throws IOException {
         int timeout = 1000;
         mdc_socket.setSoTimeout(timeout);
         mdc_socket.setTimeToLive(2);
@@ -41,7 +41,7 @@ public class PeerBackup extends Peer implements Runnable{
             FileInputStream is = new FileInputStream(file);
             Path path = Paths.get(file.getAbsolutePath());
             BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-            byte[] bodyWithNulls = new byte[6000];
+            byte[] bodyWithNulls = new byte[60000];
             int chunkLen = 0;
             int chunkNo = 0;
             while ((chunkLen = is.read(bodyWithNulls)) != -1) {
@@ -74,8 +74,6 @@ public class PeerBackup extends Peer implements Runnable{
         try {
             backup();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

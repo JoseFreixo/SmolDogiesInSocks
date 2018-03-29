@@ -39,23 +39,33 @@ public class SocketRunnable implements Runnable {
         byte [] rbuf = new byte[70000];
         DatagramPacket packet = new DatagramPacket(rbuf, rbuf.length);
         System.out.println("runnable a fazer cenas");
+        System.out.println(ip);
+        System.out.println(port);
         while(true){
             try {
                 socket.receive(packet);
+                System.out.println("Recebi cenas");
                 PacketData packetData = new PacketData(packet);
                 if(this.peer.id == Integer.parseInt(packetData.getSenderId())){
                     continue;
                 }
                 if(packetData.getType().equals("STORED") && this.peer.storedsRecieved.containsKey(packetData.getChunkNo() + packetData.getFileId())){
                     System.out.println("recebi pacotee stored");
-                    Integer i = this.peer.storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId());
-                    this.peer.storedsRecieved.put(packetData.getChunkNo()+ packetData.getFileId(),i + 1);
-                    System.out.println("meti os storeds a " + this.peer.storedsRecieved.get(packetData.getChunkNo()+ packetData.getFileId()));
+                    synchronized(System.out) {
+                        Integer i = this.peer.storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId());
+                        this.peer.storedsRecieved.put(packetData.getChunkNo()+ packetData.getFileId(),i + 1);
+                        System.out.println("meti os storeds a " + this.peer.storedsRecieved.get(packetData.getChunkNo()+ packetData.getFileId()));
+                    }
                 }
                 if(packetData.getType().equals("PUTCHUNK")){
                     System.out.println("era putchunk vou guardar");
                     PeerStore peerStore = new PeerStore(packetData);
                     threadPoolExecutor.execute(peerStore);
+                }
+                if(packetData.getType().equals("DELETE")){
+                    System.out.println("era Delete vou apagar cenas");
+                    PeerDelete peerDelete = new PeerDelete(packetData);
+                    threadPoolExecutor.execute(peerDelete);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

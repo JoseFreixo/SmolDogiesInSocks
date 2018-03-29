@@ -18,8 +18,6 @@ public class Peer implements ControlInterface {
     protected static String crlf = "" + (char)0xD + (char)0xA;
     protected static String version = "1.0";
     protected static  Map<String, Integer> storedsRecieved = new Hashtable<>();
-    public int maxTries = 5;
-    public static String fileSent;
     public static Peer peer;
 
     public Peer(){
@@ -104,6 +102,13 @@ public class Peer implements ControlInterface {
     public int backup(String file_name, String repl) throws IOException, InterruptedException {
         PeerBackup peerBackup = new PeerBackup(file_name,repl);
         peerBackup.run();
+        return 0;
+    }
+
+    @Override
+    public int delete(String file_name) {
+        PeerSendDelete peerSendDelete = new PeerSendDelete(file_name);
+        peerSendDelete.run();
         return 0;
     }
 }

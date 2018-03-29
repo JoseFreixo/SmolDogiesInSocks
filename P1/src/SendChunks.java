@@ -35,8 +35,10 @@ public class SendChunks implements Runnable{
             }
             System.out.println(storedsRecieved.toString());
             System.out.println("Storeds received "+storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId()));
-            if(storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId()) >= Integer.parseInt(packetData.getRepl()))
-                break;
+            synchronized(System.out) {
+                if (storedsRecieved.get(packetData.getChunkNo() + packetData.getFileId()) >= Integer.parseInt(packetData.getRepl()))
+                    break;
+            }
             tries++;
             sleepingTime*=2;
         }
