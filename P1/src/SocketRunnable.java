@@ -11,6 +11,7 @@ public class SocketRunnable implements Runnable {
     private InetAddress ip;
     private int port;
     private MulticastSocket socket;
+    ExecutorService threadPoolExecutor;
 
     public SocketRunnable(InetAddress ip, int port, Peer peer) throws IOException {
         this.ip = ip;
@@ -23,13 +24,13 @@ public class SocketRunnable implements Runnable {
         int  maxPoolSize   =   10;
         long keepAliveTime = 5000;
 
-        ExecutorService threadPoolExecutor =
+        threadPoolExecutor =
                 new ThreadPoolExecutor(
                         corePoolSize,
                         maxPoolSize,
                         keepAliveTime,
                         TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<Runnable>()
+                        new LinkedBlockingQueue<>()
                 );
     }
 
@@ -46,16 +47,18 @@ public class SocketRunnable implements Runnable {
                 if(this.peer.id == Integer.parseInt(packetData.getSenderId())){
                     continue;
                 }
-                System.out.println(new String(packetData.getBody()));
-                if(packetData.getType() == "STORED" && packetData.getFileId() == this.peer.fileSent){
+                System.out.println(packetData.getType());
+                System.out.println(packetData.getFileId());
+                System.out.println(this.peer.fileSent);
+                if(packetData.getType().equals("STORED") && packetData.getFileId().equals(this.peer.fileSent)){
                     System.out.println("recebi pacotee stored");
-                    this.peer.storedsRecieved++;
+                    Integer i = this.peer.storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId());
+                    this.peer.storedsRecieved.put(packetData.getChunkNo()+ packetData.getFileId(),i + 1);
                 }
                 if(packetData.getType().equals("PUTCHUNK")){
                     System.out.println("era putchunk vou guardar");
                     PeerStore peerStore = new PeerStore(packetData);
-                    Thread storeThread = new Thread(peerStore);
-                    storeThread.start();
+                    threadPoolExecutor.execute(peerStore);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

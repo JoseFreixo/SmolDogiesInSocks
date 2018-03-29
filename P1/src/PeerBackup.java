@@ -37,17 +37,19 @@ public class PeerBackup extends Peer implements Runnable{
         int tries = 0;
 
         int sleepingTime = 1000;
+        storedsRecieved.put(chunkNo+fileId,0);
         while (tries < maxTries) {
             mdc_socket.send(packet);
             System.out.println("enviei cenas");
             Thread.sleep(sleepingTime);
-            if(storedsRecieved >= Integer.parseInt(repl))
+            System.out.println("Storeds received "+storedsRecieved);
+            if(storedsRecieved.get(chunkNo+fileId) >= Integer.parseInt(repl))
                 break;
             tries++;
             sleepingTime*=2;
         }
 
-        storedsRecieved = 0;
+        storedsRecieved.remove(chunkNo+fileId);
 
         System.out.println("Hello Manel");
         return 0;

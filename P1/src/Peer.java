@@ -12,7 +12,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
 
 public class Peer implements ControlInterface {
     protected static int id;
@@ -24,9 +27,9 @@ public class Peer implements ControlInterface {
     protected static MulticastSocket mcc_socket;
     protected static String crlf = "" + (char)0xD + (char)0xA;
     protected static String version = "1.0";
-    public int storedsRecieved = 0;
+    public static AbstractMap<String,Integer> storedsRecieved;
     public int maxTries = 5;
-    public String fileSent;
+    public static String fileSent;
     public static Peer peer;
 
     public Peer(){
@@ -44,7 +47,6 @@ public class Peer implements ControlInterface {
         bootSockets(args);
         SocketRunnable mdcRunnable = new SocketRunnable(mdc_ip,mdc_port,peer);
         SocketRunnable mccRunnable = new SocketRunnable(mcc_ip,mcc_port,peer);
-
         Thread mdcThread = new Thread(mdcRunnable);
         Thread mccThread = new Thread(mccRunnable);
 

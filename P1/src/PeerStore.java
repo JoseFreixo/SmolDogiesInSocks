@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,10 +14,17 @@ public class PeerStore extends Peer implements Runnable{
     @Override
     public void run() {
         System.out.println(id + " is Storing");
-        Path newFile = Paths.get("Copy of " + packetData.getFileId());
-        System.out.println(new String(packetData.getBody()));
+        Path newFile = Paths.get("Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
         try {
             Files.write(newFile, packetData.getBody());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String message = "STORED " +version +" " +id +" " +packetData.getFileId()+" " + packetData.getChunkNo()+" " + crlf + crlf;
+        byte [] messageSend = message.getBytes();
+        DatagramPacket packet = new DatagramPacket(messageSend, messageSend.length, mcc_ip, mcc_port);
+        try {
+            mdc_socket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
         }
