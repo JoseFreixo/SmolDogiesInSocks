@@ -1,21 +1,11 @@
-import java.io.File;
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.SocketTimeoutException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Peer implements ControlInterface {
     protected static int id;
@@ -27,7 +17,7 @@ public class Peer implements ControlInterface {
     protected static MulticastSocket mcc_socket;
     protected static String crlf = "" + (char)0xD + (char)0xA;
     protected static String version = "1.0";
-    public static AbstractMap<String,Integer> storedsRecieved;
+    protected static  Map<String, Integer> storedsRecieved = new Hashtable<>();
     public int maxTries = 5;
     public static String fileSent;
     public static Peer peer;

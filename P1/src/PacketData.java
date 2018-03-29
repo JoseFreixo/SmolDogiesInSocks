@@ -36,6 +36,10 @@ public class PacketData {
         return packetSplit[4];
     }
 
+    public String getRepl(){
+        return packetSplit[5];
+    }
+
     public byte[] getBody(){
         return body;
     }

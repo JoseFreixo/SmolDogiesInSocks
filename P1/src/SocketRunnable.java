@@ -49,11 +49,12 @@ public class SocketRunnable implements Runnable {
                 }
                 System.out.println(packetData.getType());
                 System.out.println(packetData.getFileId());
-                System.out.println(this.peer.fileSent);
-                if(packetData.getType().equals("STORED") && packetData.getFileId().equals(this.peer.fileSent)){
+                if(packetData.getType().equals("STORED") && this.peer.storedsRecieved.containsKey(packetData.getChunkNo() + packetData.getFileId())){
                     System.out.println("recebi pacotee stored");
+
                     Integer i = this.peer.storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId());
                     this.peer.storedsRecieved.put(packetData.getChunkNo()+ packetData.getFileId(),i + 1);
+                    System.out.println();
                 }
                 if(packetData.getType().equals("PUTCHUNK")){
                     System.out.println("era putchunk vou guardar");

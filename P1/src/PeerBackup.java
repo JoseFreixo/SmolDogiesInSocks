@@ -1,14 +1,29 @@
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.*;
 
 public class PeerBackup extends Peer implements Runnable{
     String file_name;
     String repl;
+
+    int  corePoolSize  =    5;
+    int  maxPoolSize   =   10;
+    long keepAliveTime = 5000;
+    ExecutorService threadPoolExecutor =
+            new ThreadPoolExecutor(
+            corePoolSize,
+            maxPoolSize,
+            keepAliveTime,
+            TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>()
+            );
     public PeerBackup(String file_name, String repl) {
         super();
         this.file_name = file_name;
@@ -20,36 +35,33 @@ public class PeerBackup extends Peer implements Runnable{
         mdc_socket.setSoTimeout(timeout);
         mdc_socket.setTimeToLive(2);
 
-        File file = new File(file_name);
-        Path path = Paths.get(file.getAbsolutePath());
-        BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-        byte[] body = Files.readAllBytes(path);
-        String fileId = encodeSHA256(file_name + attr.creationTime() + attr.lastModifiedTime() + attr.size());
-        String chunkNo = "0";
-        String message = "PUTCHUNK " + version + " " + id + " " + fileId + " " + chunkNo + " " + repl + " " + crlf + crlf;
-        byte[] sbuf1 = message.getBytes();
-        byte[] result = concat(sbuf1,body);
+        try {
+            File file = new File(file_name);
+            FileInputStream is = new FileInputStream(file);
+            Path path = Paths.get(file.getAbsolutePath());
+            BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+            byte[] body = new byte[6000];
+            int chunkLen = 0;
+            while ((chunkLen = is.read(body)) != -1) {
+                String fileId = encodeSHA256(file_name + attr.creationTime() + attr.lastModifiedTime() + attr.size());
+                int chunkNo = 0;
+                String message = "PUTCHUNK " + version + " " + id + " " + fileId + " " + chunkNo + " " + repl + " " + crlf + crlf;
+                byte[] sbuf1 = message.getBytes();
+                byte[] result = concat(sbuf1,body);
+                DatagramPacket packet = new DatagramPacket(result, result.length, mdc_ip, mdc_port);
 
-        fileSent = fileId;
-        DatagramPacket packet = new DatagramPacket(result, result.length, mdc_ip, mdc_port);
-        System.out.println(mdc_ip);
-        System.out.println(mdc_port);
-        int tries = 0;
+                storedsRecieved.put(chunkNo+fileId,0);
+                PacketData packetData = new PacketData(packet);
+                chunkNo++;
+                SendChunks sendChunks = new SendChunks(packet,mdc_socket,packetData,storedsRecieved);
 
-        int sleepingTime = 1000;
-        storedsRecieved.put(chunkNo+fileId,0);
-        while (tries < maxTries) {
-            mdc_socket.send(packet);
-            System.out.println("enviei cenas");
-            Thread.sleep(sleepingTime);
-            System.out.println("Storeds received "+storedsRecieved);
-            if(storedsRecieved.get(chunkNo+fileId) >= Integer.parseInt(repl))
-                break;
-            tries++;
-            sleepingTime*=2;
+                threadPoolExecutor.execute(sendChunks);
+            }
+        } catch (FileNotFoundException fnfE) {
+            // file not found, handle case
+        } catch (IOException ioE) {
+            // problem reading, handle case
         }
-
-        storedsRecieved.remove(chunkNo+fileId);
 
         System.out.println("Hello Manel");
         return 0;
