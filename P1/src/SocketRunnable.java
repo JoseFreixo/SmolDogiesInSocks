@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.*;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -21,7 +20,7 @@ public class SocketRunnable implements Runnable {
         this.peer = peer;
 
         int  corePoolSize  =    5;
-        int  maxPoolSize   =   10;
+        int  maxPoolSize   =   15;
         long keepAliveTime = 5000;
 
         threadPoolExecutor =
@@ -49,6 +48,7 @@ public class SocketRunnable implements Runnable {
                 if(this.peer.id == Integer.parseInt(packetData.getSenderId())){
                     continue;
                 }
+                System.out.println(packetData.getType());
                 if(packetData.getType().equals("STORED") && this.peer.storedsRecieved.containsKey(packetData.getChunkNo() + packetData.getFileId())){
                     System.out.println("recebi pacotee stored");
                     synchronized(System.out) {
@@ -66,6 +66,28 @@ public class SocketRunnable implements Runnable {
                     System.out.println("era Delete vou apagar cenas");
                     PeerDelete peerDelete = new PeerDelete(packetData);
                     threadPoolExecutor.execute(peerDelete);
+                }
+                if(packetData.getType().equals("GETCHUNK")){
+                    System.out.println("era get chunk vou à procura do chunk para mandar");
+                    PeerGetChunks peerGetChunks = new PeerGetChunks(packetData);
+                    threadPoolExecutor.execute(peerGetChunks);
+                }
+                if(packetData.getType().equals("GETCHUNK")){
+                    System.out.println("era get chunk vou à procura do chunk para mandar");
+                    this.peer.wasChunkReceived = false;
+                    PeerGetChunks peerGetChunks = new PeerGetChunks(packetData);
+                    threadPoolExecutor.execute(peerGetChunks);
+                }
+                if(packetData.getType().equals("CHUNK")){
+                    System.out.println("Chunk foi recebido");
+                    this.peer.wasChunkReceived = true;
+                }
+                if(packetData.getType().equals("CHUNK") && this.peer.restorePeer){
+                    System.out.println("Chunk foi recebido pelo restorePeer");
+                    this.peer.receivedChunk = packetData.getBody();
+                    for (int i = 0; i < 20; i++) {
+                        System.out.println(packetData.getBody()[i]);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

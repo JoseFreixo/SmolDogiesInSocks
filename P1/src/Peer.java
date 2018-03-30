@@ -21,6 +21,10 @@ public class Peer implements ControlInterface {
     protected static String crlf = "" + (char)0xD + (char)0xA;
     protected static String version = "1.0";
     protected static  Map<String, Integer> storedsRecieved = new Hashtable<>();
+    protected static boolean wasChunkReceived = false;
+    protected static boolean restorePeer = false;
+    protected static byte[] receivedChunk;
+    protected static int chunkMaxSize = 60000;
     public static Peer peer;
 
     public Peer(){
@@ -38,11 +42,14 @@ public class Peer implements ControlInterface {
         bootSockets(args);
         SocketRunnable mdcRunnable = new SocketRunnable(mdc_ip,mdc_port,peer);
         SocketRunnable mccRunnable = new SocketRunnable(mcc_ip,mcc_port,peer);
+        SocketRunnable mdrRunnable = new SocketRunnable(mdr_ip,mdr_port,peer);
         Thread mdcThread = new Thread(mdcRunnable);
         Thread mccThread = new Thread(mccRunnable);
+        Thread mdrThread = new Thread(mdrRunnable);
 
         mdcThread.start();
         mccThread.start();
+        mdrThread.start();
 
         System.out.println("Dei start");
 
@@ -100,11 +107,6 @@ public class Peer implements ControlInterface {
         return result;
     }
 
-
-    public void store(PacketData packetData){
-
-    }
-
     @Override
     public int backup(String file_name, String repl) throws IOException, InterruptedException {
         PeerBackup peerBackup = new PeerBackup(file_name,repl);
@@ -120,7 +122,10 @@ public class Peer implements ControlInterface {
     }
 
     @Override
-    public int restore(String arg) throws IOException, InterruptedException {
+    public int restore(String file_name) throws IOException, InterruptedException {
+        restorePeer = true;
+        PeerRestore peerRestore = new PeerRestore(file_name);
+        peerRestore.run();
         return 0;
     }
 }

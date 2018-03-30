@@ -7,6 +7,8 @@ public class PacketData {
     //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
     //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
     //DELETE <Version> <SenderId> <FileId> <CRLF><CRLF>
+    //GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
+    //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
     public PacketData(DatagramPacket packet) {
         byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());
         byte[] remainder = null;

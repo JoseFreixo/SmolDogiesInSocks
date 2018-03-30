@@ -41,7 +41,7 @@ public class PeerBackup extends Peer implements Runnable{
             FileInputStream is = new FileInputStream(file);
             Path path = Paths.get(file.getAbsolutePath());
             BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-            byte[] bodyWithNulls = new byte[60000];
+            byte[] bodyWithNulls = new byte[chunkMaxSize];
             int chunkLen = 0;
             int chunkNo = 0;
             while ((chunkLen = is.read(bodyWithNulls)) != -1) {
