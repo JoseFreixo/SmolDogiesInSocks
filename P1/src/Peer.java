@@ -22,7 +22,7 @@ public class Peer implements ControlInterface {
     protected static String version = "1.0";
     protected static  Map<String, Integer> storedsRecieved = new Hashtable<>();
     protected static boolean wasChunkReceived = false;
-    protected static boolean restorePeer = false;
+    protected static boolean initiatorPeer = false;
     protected static byte[] receivedChunk;
     protected static int chunkMaxSize = 60000;
     public static Peer peer;
@@ -123,9 +123,10 @@ public class Peer implements ControlInterface {
 
     @Override
     public int restore(String file_name) throws IOException, InterruptedException {
-        restorePeer = true;
+        initiatorPeer = true;
         PeerRestore peerRestore = new PeerRestore(file_name);
         peerRestore.run();
+        initiatorPeer = false;
         return 0;
     }
 }

@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.nio.file.Files;
@@ -14,9 +15,15 @@ public class PeerStore extends Peer implements Runnable{
     @Override
     public void run() {
         System.out.println(id + " is Storing");
+        File file = new File("Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
+        if(file.exists())
+            return;
         Path newFile = Paths.get("Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
+        Path countFile = Paths.get("countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
         try {
             Files.write(newFile, packetData.getBody());
+            String count = packetData.getRepl() + " " + 1;
+            Files.write(countFile,count.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
