@@ -7,4 +7,6 @@ public interface ControlInterface extends Remote{
     int delete(String arg) throws IOException, InterruptedException;
 
     int restore(String arg) throws IOException, InterruptedException;
+
+    int reclaim(int size) throws IOException, InterruptedException;
 }

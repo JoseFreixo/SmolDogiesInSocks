@@ -129,4 +129,11 @@ public class Peer implements ControlInterface {
         initiatorPeer = false;
         return 0;
     }
+
+    @Override
+    public int reclaim(int size) throws IOException, InterruptedException {
+        PeerReclaim peerReclaim = new PeerReclaim(size);
+        peerReclaim.run();
+        return 0;
+    }
 }

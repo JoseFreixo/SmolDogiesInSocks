@@ -17,6 +17,8 @@ public class Client {
                 response = stub.delete(args[1]);
             }else if (args[0].equals("RESTORE")){
                 response = stub.restore(args[1]);
+            }else if (args[0].equals("RECLAIM")){
+                response = stub.reclaim(Integer.parseInt(args[1]));
             }
 
 

@@ -93,9 +93,6 @@ public class SocketRunnable implements Runnable {
                 if(packetData.getType().equals("CHUNK") && this.peer.initiatorPeer){
                     System.out.println("Chunk foi recebido pelo initiatorPeer");
                     this.peer.receivedChunk = packetData.getBody();
-                    for (int i = 0; i < 20; i++) {
-                        System.out.println(packetData.getBody()[i]);
-                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
