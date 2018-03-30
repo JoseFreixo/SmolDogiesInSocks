@@ -94,6 +94,14 @@ public class SocketRunnable implements Runnable {
                     System.out.println("Chunk foi recebido pelo initiatorPeer");
                     this.peer.receivedChunk = packetData.getBody();
                 }
+                if(packetData.getType().equals("REMOVED")){
+                    File file = new File("countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
+                    Path path = Paths.get(file.getAbsolutePath());
+                    String replStoreds[] = new String(Files.readAllBytes(path)).split(" ");
+                    Integer count = Integer.parseInt(replStoreds[1]) - 1;
+                    String store = replStoreds[0] + " " + count;
+                    Files.write(path,store.getBytes());
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
