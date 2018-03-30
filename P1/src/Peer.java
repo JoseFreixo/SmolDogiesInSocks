@@ -11,10 +11,13 @@ public class Peer implements ControlInterface {
     protected static int id;
     protected static InetAddress mdc_ip;
     protected static int mdc_port;
+    protected static MulticastSocket mdc_socket;
     protected static InetAddress mcc_ip;
     protected static int mcc_port;
-    protected static MulticastSocket mdc_socket;
     protected static MulticastSocket mcc_socket;
+    protected static InetAddress mdr_ip;
+    protected static int mdr_port;
+    protected static MulticastSocket mdr_socket;
     protected static String crlf = "" + (char)0xD + (char)0xA;
     protected static String version = "1.0";
     protected static  Map<String, Integer> storedsRecieved = new Hashtable<>();
@@ -26,9 +29,9 @@ public class Peer implements ControlInterface {
 
     public static void main(String[] args) throws IOException{
 
-        if (args.length != 5) {
+        if (args.length != 8) {
             System.out.println("Wrong arguments! Try:");
-            System.out.println("Peer <id> <MDC_ip> <MDC_port> <MCC_id> <MCC_port>");
+            System.out.println("Peer <id> <version> <MDC_ip> <MDC_port> <MCC_ip> <MCC_port> <MDR_ip> <MDR_port>");
             return;
         }
 
@@ -61,13 +64,17 @@ public class Peer implements ControlInterface {
 
     protected static void bootSockets(String[] args) throws IOException {
         id = Integer.parseInt(args[0]);
-        mdc_ip = InetAddress.getByName(args[1]);
-        mdc_port = Integer.parseInt(args[2]);
-        mcc_ip = InetAddress.getByName(args[3]);
-        mcc_port = Integer.parseInt(args[4]);
+        version = args[1];
+        mdc_ip = InetAddress.getByName(args[2]);
+        mdc_port = Integer.parseInt(args[3]);
+        mcc_ip = InetAddress.getByName(args[4]);
+        mcc_port = Integer.parseInt(args[5]);
+        mdr_ip = InetAddress.getByName(args[6]);
+        mdr_port = Integer.parseInt(args[7]);
 
         mdc_socket = new MulticastSocket(mdc_port);
         mcc_socket = new MulticastSocket(mcc_port);
+        mdr_socket = new MulticastSocket(mdr_port);
     }
     protected static String encodeSHA256(String text) {
         try{
@@ -109,6 +116,11 @@ public class Peer implements ControlInterface {
     public int delete(String file_name) {
         PeerSendDelete peerSendDelete = new PeerSendDelete(file_name);
         peerSendDelete.run();
+        return 0;
+    }
+
+    @Override
+    public int restore(String arg) throws IOException, InterruptedException {
         return 0;
     }
 }
