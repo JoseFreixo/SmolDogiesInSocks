@@ -10,7 +10,7 @@ public class SendChunks implements Runnable{
     Map<String,Integer> storedsRecieved;
 
     int maxTries = 5;
-    int sleepingTime = 1000;
+    int sleepingTime;
     public SendChunks(DatagramPacket packet, MulticastSocket socket, PacketData packetData, Map<String,Integer> storedsRecieved) {
         this.packet = packet;
         this.socket = socket;
@@ -21,14 +21,17 @@ public class SendChunks implements Runnable{
     @Override
     public void run() {
         int tries = 0;
+        sleepingTime = 1000;
         System.out.println("Thread a fazer o " + packetData.getChunkNo() + packetData.getFileId());
         while (tries < maxTries) {
             try {
+                System.out.println("vou enviar");
                 socket.send(packet);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             try {
+                System.out.println("vou dormir");
                 Thread.sleep(sleepingTime);
             } catch (InterruptedException e) {
                 e.printStackTrace();

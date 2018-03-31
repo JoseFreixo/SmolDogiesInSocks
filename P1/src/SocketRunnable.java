@@ -18,6 +18,7 @@ public class SocketRunnable implements Runnable {
     ExecutorService threadPoolExecutor;
     boolean putChunkArrived = false;
     String putChunkFileId = "";
+    int timeout = 1000;
 
     public SocketRunnable(InetAddress ip, int port, Peer peer) throws IOException {
         this.ip = ip;
@@ -123,8 +124,8 @@ public class SocketRunnable implements Runnable {
                             if(!putChunkArrived){
                                 System.out.println("vou mandar o chunk outra vez");
                                 this.peer.storedsRecieved.put(packetData.getChunkNo()+packetData.getFileId(),0);
-                                SendChunks sendChunks = new SendChunks(packet,this.peer.mdc_socket,packetData,this.peer.storedsRecieved);
-                                threadPoolExecutor.execute(sendChunks);
+                                RestoreChunk restoreChunk = new RestoreChunk(packetData,repl);
+                                threadPoolExecutor.execute(restoreChunk);
                             }
                         }
                     }
