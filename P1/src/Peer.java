@@ -25,6 +25,7 @@ public class Peer implements ControlInterface {
     protected static boolean initiatorPeer = false;
     protected static byte[] receivedChunk;
     protected static int chunkMaxSize = 60000;
+    protected static int maxWaitingTime = 400;
     public static Peer peer;
 
     public Peer(){
@@ -59,7 +60,7 @@ public class Peer implements ControlInterface {
 
             // Bind the remote object's stub in the registry
             Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("Manel", stub);
+            registry.rebind("peer"+id, stub);
 
             System.err.println("Server ready");
         } catch (Exception e) {
@@ -117,7 +118,9 @@ public class Peer implements ControlInterface {
     @Override
     public int delete(String file_name) {
         PeerSendDelete peerSendDelete = new PeerSendDelete(file_name);
-        peerSendDelete.run();
+        Thread sendDelete = new Thread(peerSendDelete);
+        sendDelete.start();
+
         return 0;
     }
 

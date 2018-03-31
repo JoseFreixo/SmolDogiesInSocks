@@ -4,6 +4,7 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -15,6 +16,8 @@ public class SocketRunnable implements Runnable {
     private int port;
     private MulticastSocket socket;
     ExecutorService threadPoolExecutor;
+    boolean putChunkArrived = false;
+    String putChunkFileId = "";
 
     public SocketRunnable(InetAddress ip, int port, Peer peer) throws IOException {
         this.ip = ip;
@@ -71,6 +74,8 @@ public class SocketRunnable implements Runnable {
                     }
                 }
                 if(packetData.getType().equals("PUTCHUNK")){
+                    if(packetData.getFileId().equals(this.putChunkFileId))
+                        this.putChunkArrived = true;
                     System.out.println("era putchunk vou guardar");
                     PeerStore peerStore = new PeerStore(packetData);
                     threadPoolExecutor.execute(peerStore);
@@ -96,13 +101,37 @@ public class SocketRunnable implements Runnable {
                 }
                 if(packetData.getType().equals("REMOVED")){
                     File file = new File("countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
-                    Path path = Paths.get(file.getAbsolutePath());
-                    String replStoreds[] = new String(Files.readAllBytes(path)).split(" ");
-                    Integer count = Integer.parseInt(replStoreds[1]) - 1;
-                    String store = replStoreds[0] + " " + count;
-                    Files.write(path,store.getBytes());
+                    if(file.exists()){
+                        Path path = Paths.get(file.getAbsolutePath());
+                        byte[] storedArray = Files.readAllBytes(path);
+                        String stored = new String(storedArray);
+                        String replStoreds[] = stored.split(" ");
+                        Integer count = Integer.parseInt(replStoreds[1]) - 1;
+                        String store = replStoreds[0] + " " + count;
+                        Files.write(path,store.getBytes());
+                        Integer repl =  Integer.parseInt(replStoreds[0]);
+                        System.out.println(packetData.getChunkNo());
+                        System.out.println("repl " + repl);
+                        System.out.println("count " + count);
+                        if(repl > count){
+                            System.out.println("repl menor do que storeds");
+                            this.putChunkFileId = packetData.getFileId();
+                            this.putChunkArrived = false;
+                            Random rand = new Random();
+                            int waitingTime = rand.nextInt(this.peer.maxWaitingTime);
+                            Thread.sleep(waitingTime);
+                            if(!putChunkArrived){
+                                System.out.println("vou mandar o chunk outra vez");
+                                this.peer.storedsRecieved.put(packetData.getChunkNo()+packetData.getFileId(),0);
+                                SendChunks sendChunks = new SendChunks(packet,this.peer.mdc_socket,packetData,this.peer.storedsRecieved);
+                                threadPoolExecutor.execute(sendChunks);
+                            }
+                        }
+                    }
                 }
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }

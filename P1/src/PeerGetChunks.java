@@ -8,7 +8,6 @@ import java.util.Random;
 
 public class PeerGetChunks extends Peer implements Runnable {
     PacketData packetData;
-    int maxWaitingTime = 400;
 
     public PeerGetChunks(PacketData packetData) {
         this.packetData = packetData;
@@ -31,7 +30,7 @@ public class PeerGetChunks extends Peer implements Runnable {
         byte[] sbuf1 = message.getBytes();
         byte[] result = concat(sbuf1,body);
         DatagramPacket packet = new DatagramPacket(result, result.length, mdr_ip, mdr_port);
-        int waitingTime = rand.nextInt(maxWaitingTime) + 1;
+        int waitingTime = rand.nextInt(maxWaitingTime);
         try {
             Thread.sleep(waitingTime);
             if(wasChunkReceived){
