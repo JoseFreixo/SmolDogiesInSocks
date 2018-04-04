@@ -16,8 +16,6 @@ public class PeerStore extends Peer implements Runnable{
     public void run() {
         System.out.println(id + " is Storing");
         File file = new File("Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
-        if(file.exists())
-            return;
         Path newFile = Paths.get("Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
         Path countFile = Paths.get("countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
         try {

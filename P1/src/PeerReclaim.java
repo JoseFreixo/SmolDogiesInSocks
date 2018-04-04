@@ -4,8 +4,8 @@ import java.net.DatagramPacket;
 
 public class PeerReclaim extends Peer implements Runnable{
     int maxSize;
-    public PeerReclaim(int file_name) {
-        this.maxSize = file_name;
+    public PeerReclaim(int size) {
+        this.maxSize = size;
     }
 
     @Override

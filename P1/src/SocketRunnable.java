@@ -58,12 +58,12 @@ public class SocketRunnable implements Runnable {
                 }
                 System.out.println(packetData.getType());
                 if(packetData.getType().equals("STORED")){
-                    if (this.peer.storedsRecieved.containsKey(packetData.getChunkNo() + packetData.getFileId())){
+                    if (this.peer.storedsReceived.containsKey(packetData.getChunkNo() + packetData.getFileId())){
                         System.out.println("recebi pacotee stored");
                         synchronized(System.out) {
-                            Integer i = this.peer.storedsRecieved.get(packetData.getChunkNo()+packetData.getFileId());
-                            this.peer.storedsRecieved.put(packetData.getChunkNo()+ packetData.getFileId(),i + 1);
-                            System.out.println("meti os storeds a " + this.peer.storedsRecieved.get(packetData.getChunkNo()+ packetData.getFileId()));
+                            Integer i = this.peer.storedsReceived.get(packetData.getChunkNo()+packetData.getFileId());
+                            this.peer.storedsReceived.put(packetData.getChunkNo()+ packetData.getFileId(),i + 1);
+                            System.out.println("meti os storeds a " + this.peer.storedsReceived.get(packetData.getChunkNo()+ packetData.getFileId()));
                         }
                     }else {
                         File file = new File("countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
@@ -115,7 +115,7 @@ public class SocketRunnable implements Runnable {
                         System.out.println("repl " + repl);
                         System.out.println("count " + count);
                         if(repl > count){
-                            System.out.println("repl menor do que storeds");
+                            System.out.println("repl maior do que storeds");
                             this.putChunkFileId = packetData.getFileId();
                             this.putChunkArrived = false;
                             Random rand = new Random();
@@ -123,9 +123,9 @@ public class SocketRunnable implements Runnable {
                             Thread.sleep(waitingTime);
                             if(!putChunkArrived){
                                 System.out.println("vou mandar o chunk outra vez");
-                                this.peer.storedsRecieved.put(packetData.getChunkNo()+packetData.getFileId(),0);
-                                RestoreChunk restoreChunk = new RestoreChunk(packetData,repl);
-                                threadPoolExecutor.execute(restoreChunk);
+                                this.peer.storedsReceived.put(packetData.getChunkNo()+packetData.getFileId(),0);
+                                ReclaimChunk reclaimChunk = new ReclaimChunk(packetData,repl);
+                                threadPoolExecutor.execute(reclaimChunk);
                             }
                         }
                     }

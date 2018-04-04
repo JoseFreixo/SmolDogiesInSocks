@@ -18,6 +18,14 @@ public class PeerDelete implements Runnable {
             f.delete();
             chunk++;
         }
-
+        chunk = 0;
+        while (true){
+            File f = new File("countChunk"+chunk+"of"+fileId);
+            if(!f.isFile())
+                break;
+            System.out.println("Deleted: countChunk"+chunk+"of"+fileId);
+            f.delete();
+            chunk++;
+        }
     }
 }

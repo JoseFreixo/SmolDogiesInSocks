@@ -53,11 +53,11 @@ public class PeerBackup extends Peer implements Runnable{
                 byte[] result = concat(sbuf1,body);
                 DatagramPacket packet = new DatagramPacket(result, result.length, mdc_ip, mdc_port);
 
-                storedsRecieved.put(chunkNo+fileId,0);
+                storedsReceived.put(chunkNo+fileId,0);
                 PacketData packetData = new PacketData(packet);
                 System.out.println("lancar thread a fazer " + chunkNo + fileId);
                 chunkNo++;
-                SendChunks sendChunks = new SendChunks(packet,mdc_socket,packetData,storedsRecieved);
+                SendChunks sendChunks = new SendChunks(packet,mdc_socket,packetData, storedsReceived);
 
                 threadPoolExecutor.execute(sendChunks);
             }

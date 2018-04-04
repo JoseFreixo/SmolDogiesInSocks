@@ -20,7 +20,7 @@ public class Peer implements ControlInterface {
     protected static MulticastSocket mdr_socket;
     protected static String crlf = "" + (char)0xD + (char)0xA;
     protected static String version = "1.0";
-    protected static  Map<String, Integer> storedsRecieved = new Hashtable<>();
+    protected static  Map<String, Integer> storedsReceived = new Hashtable<>();
     protected static boolean wasChunkReceived = false;
     protected static boolean initiatorPeer = false;
     protected static byte[] receivedChunk;
