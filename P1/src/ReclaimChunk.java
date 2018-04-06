@@ -19,7 +19,7 @@ public class ReclaimChunk extends Peer implements Runnable{
             int timeout = 1000;
             mdc_socket.setSoTimeout(timeout);
             mdc_socket.setTimeToLive(2);
-            File file = new File("Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
+            File file = new File("peer" + id + "Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
             Path path = Paths.get(file.getAbsolutePath());
             byte[] body = Files.readAllBytes(path);
             String message = "PUTCHUNK " + version + " " + id + " " + packetData.getFileId() + " " + packetData.getChunkNo() + " " + repl + " " + crlf + crlf;

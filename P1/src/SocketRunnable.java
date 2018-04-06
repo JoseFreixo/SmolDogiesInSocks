@@ -53,6 +53,12 @@ public class SocketRunnable implements Runnable {
                 socket.receive(packet);
                 System.out.println("Recebi cenas");
                 PacketData packetData = new PacketData(packet);
+
+                if(packetData.getType().equals("DELETE")){
+                    System.out.println("era Delete vou apagar cenas");
+                    PeerDelete peerDelete = new PeerDelete(packetData);
+                    threadPoolExecutor.execute(peerDelete);
+                }
                 if(this.peer.id == Integer.parseInt(packetData.getSenderId())){
                     continue;
                 }
@@ -66,7 +72,7 @@ public class SocketRunnable implements Runnable {
                             System.out.println("meti os storeds a " + this.peer.storedsReceived.get(packetData.getChunkNo()+ packetData.getFileId()));
                         }
                     }else {
-                        File file = new File("countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
+                        File file = new File("peer" + this.peer.id + "countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
                         Path path = Paths.get(file.getAbsolutePath());
                         String replStoreds[] = new String(Files.readAllBytes(path)).split(" ");
                         Integer count = Integer.parseInt(replStoreds[1]) + 1;
@@ -80,11 +86,6 @@ public class SocketRunnable implements Runnable {
                     System.out.println("era putchunk vou guardar");
                     PeerStore peerStore = new PeerStore(packetData);
                     threadPoolExecutor.execute(peerStore);
-                }
-                if(packetData.getType().equals("DELETE")){
-                    System.out.println("era Delete vou apagar cenas");
-                    PeerDelete peerDelete = new PeerDelete(packetData);
-                    threadPoolExecutor.execute(peerDelete);
                 }
                 if(packetData.getType().equals("GETCHUNK")){
                     System.out.println("era get chunk vou à procura do chunk para mandar");
@@ -101,7 +102,7 @@ public class SocketRunnable implements Runnable {
                     this.peer.receivedChunk = packetData.getBody();
                 }
                 if(packetData.getType().equals("REMOVED")){
-                    File file = new File("countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
+                    File file = new File("peer" + this.peer.id + "countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
                     if(file.exists()){
                         Path path = Paths.get(file.getAbsolutePath());
                         byte[] storedArray = Files.readAllBytes(path);

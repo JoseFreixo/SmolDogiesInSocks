@@ -16,7 +16,7 @@ public class PeerGetChunks extends Peer implements Runnable {
     @Override
     public void run() {
         Random rand = new Random();
-        File file = new File("Chunk"+packetData.getChunkNo()+"of"+packetData.getFileId());
+        File file = new File("peer" + id + "Chunk"+packetData.getChunkNo()+"of"+packetData.getFileId());
         Path path = Paths.get(file.getAbsolutePath());
         byte[] body = null;
         try {

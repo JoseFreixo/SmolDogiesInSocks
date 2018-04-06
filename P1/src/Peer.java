@@ -1,6 +1,11 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -20,12 +25,14 @@ public class Peer implements ControlInterface {
     protected static MulticastSocket mdr_socket;
     protected static String crlf = "" + (char)0xD + (char)0xA;
     protected static String version = "1.0";
-    protected static  Map<String, Integer> storedsReceived = new Hashtable<>();
+    protected static Map<String, Integer> storedsReceived = new Hashtable<>();
     protected static boolean wasChunkReceived = false;
     protected static boolean initiatorPeer = false;
     protected static byte[] receivedChunk;
     protected static int chunkMaxSize = 60000;
     protected static int maxWaitingTime = 400;
+    protected static int peerMaxSize;
+    protected static int peerCurrSize;
     public static Peer peer;
 
     public Peer(){
@@ -41,6 +48,26 @@ public class Peer implements ControlInterface {
         }
 
         bootSockets(args);
+
+        File sizeFile = new File("peer" + id + "Size");
+        if (!sizeFile.exists()){
+            FileOutputStream out = null;
+            try {
+                out = new FileOutputStream(sizeFile);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            String sizeContent;
+            sizeContent = new Integer(Integer.MAX_VALUE).toString() + " 0";
+            out.write(sizeContent.getBytes());
+            peerMaxSize = Integer.MAX_VALUE;
+            peerCurrSize = 0;
+        } else {
+            Scanner scanner = new Scanner(sizeFile);
+            peerMaxSize = scanner.nextInt();
+            peerCurrSize = scanner.nextInt();
+        }
+
         SocketRunnable mdcRunnable = new SocketRunnable(mdc_ip,mdc_port,peer);
         SocketRunnable mccRunnable = new SocketRunnable(mcc_ip,mcc_port,peer);
         SocketRunnable mdrRunnable = new SocketRunnable(mdr_ip,mdr_port,peer);
