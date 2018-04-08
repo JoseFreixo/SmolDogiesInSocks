@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Random;
@@ -74,7 +75,12 @@ public class SocketRunnable implements Runnable {
                     }else {
                         File file = new File("peer" + this.peer.id + "countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
                         Path path = Paths.get(file.getAbsolutePath());
-                        String replStoreds[] = new String(Files.readAllBytes(path)).split(" ");
+                        String replStoreds[];
+                        try {
+                            replStoreds = new String(Files.readAllBytes(path)).split(" ");
+                        } catch (NoSuchFileException e) {
+                            continue;
+                        }
                         Integer count = Integer.parseInt(replStoreds[1]) + 1;
                         String store = replStoreds[0] + " " + count;
                         Files.write(path,store.getBytes());

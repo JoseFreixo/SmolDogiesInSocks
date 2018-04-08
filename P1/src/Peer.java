@@ -57,8 +57,7 @@ public class Peer implements ControlInterface {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-            String sizeContent;
-            sizeContent = new Integer(Integer.MAX_VALUE).toString() + " 0";
+            String sizeContent = new Integer(Integer.MAX_VALUE).toString() + " 0";
             out.write(sizeContent.getBytes());
             peerMaxSize = Integer.MAX_VALUE;
             peerCurrSize = 0;

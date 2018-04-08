@@ -17,7 +17,10 @@ public class PeerStore extends Peer implements Runnable{
         if (packetData.getBody().length + peerCurrSize > peerMaxSize)
             return;
         System.out.println(id + " is Storing");
+        boolean chunkExists = false;
         File file = new File("peer" + id + "Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
+        if (file.exists())
+            chunkExists = true;
         Path newFile = Paths.get("peer" + id + "Chunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
         Path countFile = Paths.get("peer" + id + "countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
         try {
@@ -27,8 +30,8 @@ public class PeerStore extends Peer implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        peerCurrSize += packetData.getBody().length;
+        if (!chunkExists)
+            peerCurrSize += packetData.getBody().length;
 
         File peerSize = new File("peer" + id + "Size");
         Path pathPeerSize = Paths.get(peerSize.getAbsolutePath());

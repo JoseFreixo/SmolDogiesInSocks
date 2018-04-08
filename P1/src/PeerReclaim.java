@@ -1,11 +1,12 @@
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 
 public class PeerReclaim extends Peer implements Runnable{
-    int maxSize;
-    public PeerReclaim(int size) {
-        this.maxSize = size;
+    public PeerReclaim(int size) throws IOException {
+        peerMaxSize = size;
     }
 
     @Override
@@ -21,16 +22,18 @@ public class PeerReclaim extends Peer implements Runnable{
                 System.out.println("File " + listOfFiles[i].getName() + "has "+ listOfFiles[i].length() + "bytes" );
                 sizeAccumulator += listOfFiles[i].length();
             }
-            if(sizeAccumulator > this.maxSize){
+            if(sizeAccumulator > peerMaxSize){
                 break;
             }
         }
+        int sizeRemoved = 0;
         for (; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile() && listOfFiles[i].getName().startsWith("peer" + id + "Chunk")) {
                 //REMOVED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
                 System.out.println("File " + listOfFiles[i].getName() + "has "+ listOfFiles[i].length() + "bytes" );
                 String chunkNo = listOfFiles[i].getName().replace("Chunk","").replaceFirst("of.*","").replaceFirst("peer" + id,"");
                 String fileId = listOfFiles[i].getName().replaceFirst("peer" + id + "Chunk.+?of","");
+                sizeRemoved += listOfFiles[i].length();
                 listOfFiles[i].delete();
                 File file = new File("peer" + id + "countChunk"+ chunkNo+"of" + fileId);
                 file.delete();
@@ -46,6 +49,22 @@ public class PeerReclaim extends Peer implements Runnable{
                 }
             }
         }
+
+        peerCurrSize -= sizeRemoved;
+        File sizeFile = new File("peer" + id + "Size");
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(sizeFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        String sizeContent = new Integer(peerMaxSize).toString() + " " + new Integer(peerCurrSize).toString();
+        try {
+            out.write(sizeContent.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         System.out.println("total size" + sizeAccumulator);
     }
 }
