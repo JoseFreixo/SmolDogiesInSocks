@@ -7,9 +7,10 @@ public class Client {
     public static void main(String[] args) {
 
         int response = 0;
+        PeerInfo initiatorPeer = new PeerInfo(args[0]);
         try {
-            Registry registry = LocateRegistry.getRegistry(null);
-            ControlInterface stub = (ControlInterface) registry.lookup(args[0]);
+            Registry registry = LocateRegistry.getRegistry(initiatorPeer.getHost(),initiatorPeer.getPort());
+            ControlInterface stub = (ControlInterface) registry.lookup(initiatorPeer.getPeerId());
             if(args[1].equals("BACKUP")){
                 response = stub.backup(args[2],args[3]);
             }else if (args[1].equals("DELETE")){
