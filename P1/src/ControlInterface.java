@@ -9,4 +9,6 @@ public interface ControlInterface extends Remote{
     int restore(String arg) throws IOException, InterruptedException;
 
     int reclaim(int size) throws IOException, InterruptedException;
+
+    String state() throws IOException, InterruptedException;
 }

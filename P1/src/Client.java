@@ -19,9 +19,10 @@ public class Client {
                 response = stub.restore(args[2]);
             }else if (args[1].equals("RECLAIM")){
                 response = stub.reclaim(Integer.parseInt(args[2]));
+            }else if (args[1].equals("STATE")){
+                System.out.println(stub.state());
+                return;
             }
-
-
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();

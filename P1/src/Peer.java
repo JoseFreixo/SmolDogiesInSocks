@@ -166,4 +166,10 @@ public class Peer implements ControlInterface {
         peerReclaim.run();
         return 0;
     }
+
+    @Override
+    public String state() throws IOException, InterruptedException {
+        PeerState peerState = new PeerState();
+        return peerState.getState();
+    }
 }
