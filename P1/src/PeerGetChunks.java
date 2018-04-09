@@ -34,10 +34,8 @@ public class PeerGetChunks extends Peer implements Runnable {
         try {
             Thread.sleep(waitingTime);
             if(wasChunkReceived){
-                System.out.println("Chunk recebido");
                 return;
             }
-            System.out.println("Chunk enviado");
             mdr_socket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();

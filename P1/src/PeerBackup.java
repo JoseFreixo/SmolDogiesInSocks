@@ -46,16 +46,13 @@ public class PeerBackup extends Peer implements Runnable{
             int chunkNo = 0;
             while ((chunkLen = is.read(bodyWithNulls)) != -1) {
                 byte[] body = Arrays.copyOf(bodyWithNulls, chunkLen);
-                System.out.println();
                 String fileId = encodeSHA256(file_name + attr.creationTime() + attr.lastModifiedTime() + attr.size());
                 String message = "PUTCHUNK " + version + " " + id + " " + fileId + " " + chunkNo + " " + repl + " " + crlf + crlf;
                 byte[] sbuf1 = message.getBytes();
                 byte[] result = concat(sbuf1,body);
                 DatagramPacket packet = new DatagramPacket(result, result.length, mdc_ip, mdc_port);
-
                 storedsReceived.put(chunkNo+fileId,0);
                 PacketData packetData = new PacketData(packet);
-                System.out.println("lancar thread a fazer " + chunkNo + fileId);
                 chunkNo++;
                 SendChunks sendChunks = new SendChunks(packet,mdc_socket,packetData, storedsReceived);
 

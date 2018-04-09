@@ -79,8 +79,6 @@ public class Peer implements ControlInterface {
         mccThread.start();
         mdrThread.start();
 
-        System.out.println("Dei start");
-
         try {
             Peer obj = new Peer();
             ControlInterface stub = (ControlInterface) UnicastRemoteObject.exportObject(obj, 0);

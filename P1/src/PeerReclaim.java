@@ -6,6 +6,7 @@ import java.net.DatagramPacket;
 
 public class PeerReclaim extends Peer implements Runnable{
     public PeerReclaim(int size) throws IOException {
+        System.out.println("Reclaiming to " + size);
         peerMaxSize = size;
     }
 
@@ -19,7 +20,6 @@ public class PeerReclaim extends Peer implements Runnable{
         //iterate through files with size smaller than the available size
         for (i = 0; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile() && listOfFiles[i].getName().startsWith("peer" + id + "Chunk")) {
-                System.out.println("File " + listOfFiles[i].getName() + "has "+ listOfFiles[i].length() + "bytes" );
                 sizeAccumulator += listOfFiles[i].length();
             }
             if(sizeAccumulator > peerMaxSize){
@@ -30,15 +30,12 @@ public class PeerReclaim extends Peer implements Runnable{
         for (; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile() && listOfFiles[i].getName().startsWith("peer" + id + "Chunk")) {
                 //REMOVED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-                System.out.println("File " + listOfFiles[i].getName() + "has "+ listOfFiles[i].length() + "bytes" );
                 String chunkNo = listOfFiles[i].getName().replace("Chunk","").replaceFirst("of.*","").replaceFirst("peer" + id,"");
                 String fileId = listOfFiles[i].getName().replaceFirst("peer" + id + "Chunk.+?of","");
                 sizeRemoved += listOfFiles[i].length();
                 listOfFiles[i].delete();
                 File file = new File("peer" + id + "countChunk"+ chunkNo+"of" + fileId);
                 file.delete();
-                System.out.println("Chunk " + chunkNo);
-                System.out.println("fileId " + fileId);
                 String message = "REMOVED " + version + " " + id + " " + fileId + " " + chunkNo + " " + crlf + crlf;
                 byte[] result = message.getBytes();
                 DatagramPacket packet = new DatagramPacket(result, result.length, mcc_ip, mcc_port);
@@ -64,7 +61,5 @@ public class PeerReclaim extends Peer implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        System.out.println("total size" + sizeAccumulator);
     }
 }

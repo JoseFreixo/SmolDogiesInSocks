@@ -46,31 +46,25 @@ public class SocketRunnable implements Runnable {
     public void run(){
         byte [] rbuf = new byte[70000];
         DatagramPacket packet = new DatagramPacket(rbuf, rbuf.length);
-        System.out.println("runnable a fazer cenas");
-        System.out.println(ip);
-        System.out.println(port);
         while(true){
             try {
                 socket.receive(packet);
-                System.out.println("Recebi cenas");
                 PacketData packetData = new PacketData(packet);
 
                 if(packetData.getType().equals("DELETE")){
-                    System.out.println("era Delete vou apagar cenas");
+                    System.out.println("DELETE received!");
                     PeerDelete peerDelete = new PeerDelete(packetData);
                     threadPoolExecutor.execute(peerDelete);
                 }
                 if(this.peer.id == Integer.parseInt(packetData.getSenderId())){
                     continue;
                 }
-                System.out.println(packetData.getType());
                 if(packetData.getType().equals("STORED")){
+                    System.out.println("STORED received!");
                     if (this.peer.storedsReceived.containsKey(packetData.getChunkNo() + packetData.getFileId())){
-                        System.out.println("recebi pacotee stored");
                         synchronized(System.out) {
                             Integer i = this.peer.storedsReceived.get(packetData.getChunkNo()+packetData.getFileId());
                             this.peer.storedsReceived.put(packetData.getChunkNo()+ packetData.getFileId(),i + 1);
-                            System.out.println("meti os storeds a " + this.peer.storedsReceived.get(packetData.getChunkNo()+ packetData.getFileId()));
                         }
                     }else {
                         File file = new File("peer" + this.peer.id + "countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
@@ -89,25 +83,26 @@ public class SocketRunnable implements Runnable {
                 if(packetData.getType().equals("PUTCHUNK")){
                     if(packetData.getFileId().equals(this.putChunkFileId))
                         this.putChunkArrived = true;
-                    System.out.println("era putchunk vou guardar");
+                    System.out.println("PUTCHUNK received!");
                     PeerStore peerStore = new PeerStore(packetData);
                     threadPoolExecutor.execute(peerStore);
                 }
                 if(packetData.getType().equals("GETCHUNK")){
-                    System.out.println("era get chunk vou à procura do chunk para mandar");
+                    System.out.println("GETCHUNK received!");
                     this.peer.wasChunkReceived = false;
                     PeerGetChunks peerGetChunks = new PeerGetChunks(packetData);
                     threadPoolExecutor.execute(peerGetChunks);
                 }
                 if(packetData.getType().equals("CHUNK")){
-                    System.out.println("Chunk foi recebido");
+                    System.out.println("CHUNK received!");
                     this.peer.wasChunkReceived = true;
                 }
                 if(packetData.getType().equals("CHUNK") && this.peer.initiatorPeer){
-                    System.out.println("Chunk foi recebido pelo initiatorPeer");
+                    System.out.println("INITIATOR: CHUNK received!");
                     this.peer.receivedChunk = packetData.getBody();
                 }
                 if(packetData.getType().equals("REMOVED")){
+                    System.out.println("REMOVED received!");
                     File file = new File("peer" + this.peer.id + "countChunk"+ packetData.getChunkNo()+"of" + packetData.getFileId());
                     if(file.exists()){
                         Path path = Paths.get(file.getAbsolutePath());
@@ -118,18 +113,15 @@ public class SocketRunnable implements Runnable {
                         String store = replStoreds[0] + " " + count;
                         Files.write(path,store.getBytes());
                         Integer repl =  Integer.parseInt(replStoreds[0]);
-                        System.out.println(packetData.getChunkNo());
-                        System.out.println("repl " + repl);
-                        System.out.println("count " + count);
                         if(repl > count){
-                            System.out.println("repl maior do que storeds");
+                            System.out.println("Repl > Stored");
                             this.putChunkFileId = packetData.getFileId();
                             this.putChunkArrived = false;
                             Random rand = new Random();
                             int waitingTime = rand.nextInt(this.peer.maxWaitingTime);
                             Thread.sleep(waitingTime);
                             if(!putChunkArrived){
-                                System.out.println("vou mandar o chunk outra vez");
+                                System.out.println("Resending chunk!");
                                 this.peer.storedsReceived.put(packetData.getChunkNo()+packetData.getFileId(),0);
                                 ReclaimChunk reclaimChunk = new ReclaimChunk(packetData,repl);
                                 threadPoolExecutor.execute(reclaimChunk);
