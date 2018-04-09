@@ -11,6 +11,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Peer implements ControlInterface {
     protected static int id;
@@ -25,7 +26,7 @@ public class Peer implements ControlInterface {
     protected static MulticastSocket mdr_socket;
     protected static String crlf = "" + (char)0xD + (char)0xA;
     protected static String version = "1.0";
-    protected static Map<String, Integer> storedsReceived = new Hashtable<>();
+    protected static Map<String, Integer> storedsReceived = new ConcurrentHashMap<>();
     protected static boolean wasChunkReceived = false;
     protected static boolean initiatorPeer = false;
     protected static byte[] receivedChunk;
